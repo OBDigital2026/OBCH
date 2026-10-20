@@ -182,10 +182,9 @@
     const mensaje = document.getElementById('mensaje');
     const btn = document.getElementById('btnEnviar');
 
-    // Cambia esta URL por la de tu backend cuando lo subas
-    // Ejemplo local: http://localhost:3000/guardar
-    // Ejemplo producción: https://tu-api.vercel.app/guardar
-    const API_URL = 'http://localhost:3000/guardar';
+    const API_URL = window.location.hostname === 'localhost'
+      ? 'http://localhost:3000/guardar'
+      : '/guardar';
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -193,7 +192,6 @@
       const numero = document.getElementById('numero').value.trim();
       const alfanumerico = document.getElementById('alfanumerico').value.trim();
 
-      // Validación básica
       if (!numero || isNaN(numero) || Number(numero) < 0) {
         mostrarMensaje('El número debe ser un entero positivo', 'error');
         return;
@@ -222,17 +220,13 @@
         const data = await respuesta.json();
 
         if (respuesta.ok) {
-          mostrarMensaje('¡Datos guardados correctamente! ID: ' + data.id, 'exito');
+          mostrarMensaje(data.mensaje || 'Hemos recibido su solicitud correctamente', 'exito');
           form.reset();
         } else {
           mostrarMensaje(data.error || 'Error al guardar', 'error');
         }
       } catch (err) {
-        // Si no hay backend, mostramos mensaje útil
-        mostrarMensaje(
-          'No se pudo conectar al servidor. Asegúrate de tener el backend corriendo (ver README).',
-          'error'
-        );
+        mostrarMensaje('No se pudo conectar al servidor. Intenta nuevamente.', 'error');
         console.error(err);
       } finally {
         btn.disabled = false;
