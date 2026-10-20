@@ -1,24 +1,193 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Formulario de Ingreso</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #111827 0%, #7f1d1d 45%, #ef4444 100%);
+      padding: 20px;
+    }
+
+    .modal {
+      width: 100%;
+      max-width: 430px;
+      background: rgba(255, 255, 255, 0.96);
+      border: 3px solid #ef4444;
+      border-radius: 18px;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+      padding: 28px 22px;
+    }
+
+    .modal-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .modal-header h1 {
+      color: #1f2937;
+      font-size: 1.9rem;
+      margin-bottom: 8px;
+    }
+
+    .modal-header p {
+      color: #6b7280;
+      font-size: 0.95rem;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #374151;
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px 14px;
+      border: 2px solid #fca5a5;
+      border-radius: 12px;
+      background: #fff;
+      color: #111827;
+      font-size: 1rem;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    input::placeholder {
+      color: #9ca3af;
+    }
+
+    input:focus {
+      border-color: #dc2626;
+      box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.12);
+    }
+
+    input:invalid:not(:placeholder-shown) {
+      border-color: #ef4444;
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.08);
+    }
+
+    button {
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+      color: white;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 10px 24px rgba(220, 38, 38, 0.35);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    #mensaje {
+      margin-top: 18px;
+      padding: 12px;
+      border-radius: 10px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 0.95rem;
+      display: none;
+    }
+
+    #mensaje.exito {
+      display: block;
+      background: #dcfce7;
+      border: 2px solid #22c55e;
+      color: #166534;
+    }
+
+    #mensaje.error {
+      display: block;
+      background: #fee2e2;
+      border: 2px solid #ef4444;
+      color: #991b1b;
+    }
+
+    @media (max-width: 480px) {
+      .modal {
+        padding: 20px 16px;
+      }
+    }
+  </style>
 </head>
 <body>
-  <form id="formIngreso">
-    <input type="number" id="numero" required />
-    <input type="text" id="alfanumerico" required />
-    <button type="submit">Guardar</button>
-  </form>
+  <div class="modal">
+    <div class="modal-header">
+      <h1>Formulario</h1>
+      <p>Completa los datos y envíalos</p>
+    </div>
 
-  <div id="mensaje"></div>
+    <form id="formIngreso" novalidate>
+      <div class="form-group">
+        <label for="numero">Número</label>
+        <input
+          type="number"
+          id="numero"
+          name="numero"
+          placeholder="Ej: 12345"
+          required
+          min="0"
+          step="1"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="alfanumerico">Alfanumérico</label>
+        <input
+          type="text"
+          id="alfanumerico"
+          name="alfanumerico"
+          placeholder="Ej: ABC123xyz"
+          required
+          pattern="[A-Za-z0-9]+"
+          title="Solo letras y números"
+        />
+      </div>
+
+      <button type="submit" id="btnEnviar">Guardar</button>
+    </form>
+
+    <div id="mensaje"></div>
+  </div>
 
   <script>
-    const API_URL = 'https://obch.onrender.com/guardar';
-
     const form = document.getElementById('formIngreso');
     const mensaje = document.getElementById('mensaje');
+    const btn = document.getElementById('btnEnviar');
+
+    // Si tu backend está en el mismo dominio de Render:
+    const API_URL = '/guardar';
+
+    // Si quieres usar la URL directa de Render, usa esta:
+    // const API_URL = 'https://obch.onrender.com/guardar';
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -36,19 +205,24 @@
         return;
       }
 
+      btn.disabled = true;
+      btn.textContent = 'Guardando...';
+
       try {
-        const response = await fetch(API_URL, {
+        const respuesta = await fetch(API_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json'
+          },
           body: JSON.stringify({
             numero: Number(numero),
             alfanumerico
           })
         });
 
-        const data = await response.json();
+        const data = await respuesta.json();
 
-        if (response.ok) {
+        if (respuesta.ok) {
           mostrarMensaje(data.mensaje || 'Hemos recibido su solicitud correctamente', 'exito');
           form.reset();
         } else {
@@ -57,6 +231,9 @@
       } catch (err) {
         mostrarMensaje('No se pudo conectar al servidor. Intenta nuevamente.', 'error');
         console.error(err);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Guardar';
       }
     });
 
