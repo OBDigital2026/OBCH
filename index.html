@@ -1,6 +1,24 @@
-    const API_URL = window.location.hostname === 'localhost'
-      ? 'http://localhost:3000/guardar'
-      : 'https://obch.onrender.com/guardar';
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Formulario de Ingreso</title>
+</head>
+<body>
+  <form id="formIngreso">
+    <input type="number" id="numero" required />
+    <input type="text" id="alfanumerico" required />
+    <button type="submit">Guardar</button>
+  </form>
+
+  <div id="mensaje"></div>
+
+  <script>
+    const API_URL = 'https://obch.onrender.com/guardar';
+
+    const form = document.getElementById('formIngreso');
+    const mensaje = document.getElementById('mensaje');
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -18,24 +36,19 @@
         return;
       }
 
-      btn.disabled = true;
-      btn.textContent = 'Guardando...';
-
       try {
-        const respuesta = await fetch(API_URL, {
+        const response = await fetch(API_URL, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             numero: Number(numero),
-            alfanumerico: alfanumerico
+            alfanumerico
           })
         });
 
-        const data = await respuesta.json();
+        const data = await response.json();
 
-        if (respuesta.ok) {
+        if (response.ok) {
           mostrarMensaje(data.mensaje || 'Hemos recibido su solicitud correctamente', 'exito');
           form.reset();
         } else {
@@ -44,8 +57,13 @@
       } catch (err) {
         mostrarMensaje('No se pudo conectar al servidor. Intenta nuevamente.', 'error');
         console.error(err);
-      } finally {
-        btn.disabled = false;
-        btn.textContent = 'Guardar en base de datos';
       }
     });
+
+    function mostrarMensaje(texto, tipo) {
+      mensaje.textContent = texto;
+      mensaje.className = tipo;
+    }
+  </script>
+</body>
+</html>
