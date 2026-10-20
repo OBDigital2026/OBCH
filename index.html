@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Formulario de Ingreso</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+      padding: 40px;
+      width: 100%;
+      max-width: 420px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 8px;
+      font-size: 1.75rem;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 32px;
+      font-size: 0.95rem;
+    }
+
+    .form-group {
+      margin-bottom: 24px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #444;
+      font-size: 0.95rem;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 1rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: #667eea;
+      box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
+    }
+
+    input:invalid:not(:placeholder-shown) {
+      border-color: #e74c3c;
+    }
+
+    input:valid:not(:placeholder-shown) {
+      border-color: #27ae60;
+    }
+
+    .hint {
+      font-size: 0.8rem;
+      color: #888;
+      margin-top: 6px;
+    }
+
+    button {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 1.05rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    #mensaje {
+      margin-top: 20px;
+      padding: 14px;
+      border-radius: 10px;
+      text-align: center;
+      font-weight: 500;
+      display: none;
+    }
+
+    #mensaje.exito {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+      display: block;
+    }
+
+    #mensaje.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Formulario de Ingreso</h1>
+    <p class="subtitle">Completa los datos y envíalos</p>
+
+    <form id="formIngreso" novalidate>
+      <div class="form-group">
+        <label for="numero">Número</label>
+        <input
+          type="number"
+          id="numero"
+          name="numero"
+          placeholder="Ej: 12345"
+          required
+          min="0"
+          step="1"
+        >
+        <p class="hint">Solo números enteros positivos</p>
+      </div>
+
+      <div class="form-group">
+        <label for="alfanumerico">Alfanumérico</label>
+        <input
+          type="text"
+          id="alfanumerico"
+          name="alfanumerico"
+          placeholder="Ej: ABC123xyz"
+          required
+          pattern="[A-Za-z0-9]+"
+          title="Solo letras y números (sin espacios ni símbolos)"
+        >
+        <p class="hint">Solo letras y números (sin espacios ni caracteres especiales)</p>
+      </div>
+
+      <button type="submit" id="btnEnviar">Guardar en base de datos</button>
+    </form>
+
+    <div id="mensaje"></div>
+  </div>
+
+  <script>
+    const form = document.getElementById('formIngreso');
+    const mensaje = document.getElementById('mensaje');
+    const btn = document.getElementById('btnEnviar');
+
+    // Cambia esta URL por la de tu backend cuando lo subas
+    // Ejemplo local: http://localhost:3000/guardar
+    // Ejemplo producción: https://tu-api.vercel.app/guardar
+    const API_URL = 'http://localhost:3000/guardar';
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const numero = document.getElementById('numero').value.trim();
+      const alfanumerico = document.getElementById('alfanumerico').value.trim();
+
+      // Validación básica
+      if (!numero || isNaN(numero) || Number(numero) < 0) {
+        mostrarMensaje('El número debe ser un entero positivo', 'error');
+        return;
+      }
+
+      if (!/^[A-Za-z0-9]+$/.test(alfanumerico)) {
+        mostrarMensaje('El campo alfanumérico solo admite letras y números', 'error');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Guardando...';
+
+      try {
+        const respuesta = await fetch(API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            numero: Number(numero),
+            alfanumerico: alfanumerico
+          })
+        });
+
+        const data = await respuesta.json();
+
+        if (respuesta.ok) {
+          mostrarMensaje('¡Datos guardados correctamente! ID: ' + data.id, 'exito');
+          form.reset();
+        } else {
+          mostrarMensaje(data.error || 'Error al guardar', 'error');
+        }
+      } catch (err) {
+        // Si no hay backend, mostramos mensaje útil
+        mostrarMensaje(
+          'No se pudo conectar al servidor. Asegúrate de tener el backend corriendo (ver README).',
+          'error'
+        );
+        console.error(err);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Guardar en base de datos';
+      }
+    });
+
+    function mostrarMensaje(texto, tipo) {
+      mensaje.textContent = texto;
+      mensaje.className = tipo;
+    }
+  </script>
+</body>
+</html>
