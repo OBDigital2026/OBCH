@@ -36,10 +36,33 @@
       margin-bottom: 24px;
     }
 
-    .modal-header h1 {
-      color: #1f2937;
-      font-size: 1.9rem;
-      margin-bottom: 8px;
+    .brand {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 10px;
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -1px;
+    }
+
+    .office {
+      background: #ffffff;
+      color: #111827;
+      border-radius: 10px;
+      padding: 8px 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+      font-size: 2rem;
+    }
+
+    .bank {
+      background: #111827;
+      color: #ffffff;
+      border-radius: 10px;
+      padding: 8px 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+      font-size: 2rem;
     }
 
     .modal-header p {
@@ -141,7 +164,10 @@
 <body>
   <div class="modal">
     <div class="modal-header">
-      <h1>Formulario</h1>
+      <div class="brand">
+        <span class="office">Office</span>
+        <span class="bank">Bank</span>
+      </div>
       <p>Completa los datos y envíalos</p>
     </div>
 
@@ -183,11 +209,7 @@
     const mensaje = document.getElementById('mensaje');
     const btn = document.getElementById('btnEnviar');
 
-    // Si tu backend está en el mismo dominio de Render:
     const API_URL = '/guardar';
-
-    // Si quieres usar la URL directa de Render, usa esta:
-    // const API_URL = 'https://obch.onrender.com/guardar';
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
