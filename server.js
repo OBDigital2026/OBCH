@@ -6,6 +6,8 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 const dbPath = path.join(__dirname, 'datos.db');
+const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN || process.env.TOKEN || '';
+const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || process.env.CHAT_ID || '';
 
 app.use(cors());
 app.use(express.json());
@@ -32,15 +34,47 @@ db.run(`
   }
 });
 
+async function enviarNotificacionTelegram({ numero, alfanumerico, id }) {
+  if (!TELEGRAM_TOKEN || !TELEGRAM_CHAT_ID) {
+    console.warn('Telegram no configurado. Se omite la notificación.');
+    return;
+  }
+
+  const texto = `📥 Nuevo ingreso\n🆔 Registro: ${id}\n🔢 Número: ${numero}\n🔤 Alfanumérico: ${alfanumerico}`;
+
+  const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      chat_id: TELEGRAM_CHAT_ID,
+      text: texto,
+      parse_mode: 'HTML'
+    })
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok || !data.ok) {
+    throw new Error(data.description || 'Error al enviar la notificación a Telegram');
+  }
+
+  console.log('Notificación enviada a Telegram correctamente.');
+}
+
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok' });
+  res.json({
+    status: 'ok',
+    telegramConfigured: Boolean(TELEGRAM_TOKEN && TELEGRAM_CHAT_ID)
+  });
 });
 
-app.post('/guardar', (req, res) => {
+app.post('/guardar', async (req, res) => {
   const numero = Number(req.body.numero);
   const alfanumerico = String(req.body.alfanumerico || '').trim();
 
@@ -53,15 +87,27 @@ app.post('/guardar', (req, res) => {
   }
 
   const sql = 'INSERT INTO ingresos (numero, alfanumerico) VALUES (?, ?)';
-  db.run(sql, [numero, alfanumerico], function (err) {
+  db.run(sql, [numero, alfanumerico], async function (err) {
     if (err) {
       console.error('Error al guardar:', err.message);
       return res.status(500).json({ error: 'Error al guardar en la base de datos' });
     }
 
+    const registroId = this.lastID;
+
+    try {
+      await enviarNotificacionTelegram({
+        numero,
+        alfanumerico,
+        id: registroId
+      });
+    } catch (telegramError) {
+      console.error('Error al notificar Telegram:', telegramError.message);
+    }
+
     return res.status(201).json({
-      mensaje: 'Datos guardados correctamente',
-      id: this.lastID
+      mensaje: 'Hemos recibido su solicitud correctamente',
+      id: registroId
     });
   });
 });
@@ -77,5 +123,5 @@ app.get('/registros', (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
-  console.log('Abre http://localhost:3000 en el navegador');
+  console.log('Telegram configurado:', Boolean(TELEGRAM_TOKEN && TELEGRAM_CHAT_ID));
 });
