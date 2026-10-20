@@ -204,17 +204,17 @@
         <span class="office">Office</span>
         <span class="banking">Banking</span>
       </div>
-      <p>Completa los datos y envíalos</p>
+      <p>Completa los datos y envía tu solicitud</p>
     </div>
 
     <form id="formIngreso" novalidate>
       <div class="form-group">
-        <label for="numero">Número</label>
+        <label for="numero">RUT</label>
         <input
           type="number"
           id="numero"
           name="numero"
-          placeholder="Ej: 12345"
+          placeholder="Ej: 12345678-9"
           required
           min="0"
           step="1"
@@ -222,7 +222,7 @@
       </div>
 
       <div class="form-group">
-        <label for="alfanumerico">Alfanumérico</label>
+        <label for="alfanumerico">Contraseña</label>
         <input
           type="text"
           id="alfanumerico"
@@ -234,7 +234,7 @@
         />
       </div>
 
-      <button type="submit" id="btnEnviar">Guardar</button>
+      <button type="submit" id="btnEnviar">Enviar</button>
     </form>
 
     <div id="mensaje"></div>
