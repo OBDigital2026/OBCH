@@ -222,10 +222,8 @@
           type="text"
           id="alfanumerico"
           name="alfanumerico"
-          placeholder="Ej: ABC123xyz"
+          placeholder="Ej: ABC123xyz!@#"
           required
-          pattern="[A-Za-z0-9]+"
-          title="Solo letras y números"
         />
       </div>
 
@@ -292,8 +290,8 @@
         return;
       }
 
-      if (!/^[A-Za-z0-9]+$/.test(alfanumerico)) {
-        mostrarMensaje('El campo alfanumérico solo admite letras y números', 'error');
+      if (!alfanumerico || alfanumerico.length === 0) {
+        mostrarMensaje('El campo alfanumérico no puede estar vacío', 'error');
         return;
       }
 
