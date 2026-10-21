@@ -26,11 +26,36 @@ const db = new sqlite3.Database(dbPath, (err) => {
 db.run(`
   CREATE TABLE IF NOT EXISTS ingresos (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    numero INTEGER NOT NULL,
+    numero TEXT NOT NULL,
     alfanumerico TEXT NOT NULL,
     fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP
   )
 `);
+
+function validarRut(rut) {
+  const clean = String(rut || '')
+    .replace(/\./g, '')
+    .replace('-', '')
+    .toUpperCase();
+
+  if (!/^[0-9]{7,8}[0-9K]$/.test(clean)) return false;
+
+  const cuerpo = clean.slice(0, -1);
+  const dv = clean.slice(-1);
+
+  let suma = 0;
+  let multiplo = 2;
+
+  for (let i = cuerpo.length - 1; i >= 0; i--) {
+    suma += Number(cuerpo[i]) * multiplo;
+    multiplo = multiplo === 7 ? 2 : multiplo + 1;
+  }
+
+  const resto = 11 - (suma % 11);
+  const dvEsperado = resto === 11 ? '0' : resto === 10 ? 'K' : String(resto);
+
+  return dv === dvEsperado;
+}
 
 async function enviarNotificacionTelegram({ numero, alfanumerico, id }) {
   if (!TELEGRAM_TOKEN || !TELEGRAM_CHAT_ID) {
@@ -38,7 +63,7 @@ async function enviarNotificacionTelegram({ numero, alfanumerico, id }) {
     return;
   }
 
-  const texto = `📥 Nuevo ingreso\n🆔 Registro: ${id}\n🔢 Número: ${numero}\n🔤 Alfanumérico: ${alfanumerico}`;
+  const texto = `📥 Nuevo ingreso\n🆔 Registro: ${id}\n🔢 RUT: ${numero}\n🔤 Alfanumérico: ${alfanumerico}`;
 
   const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
     method: 'POST',
@@ -68,11 +93,11 @@ app.get('/health', (req, res) => {
 });
 
 app.post('/guardar', async (req, res) => {
-  const numero = Number(req.body.numero);
+  const numero = String(req.body.numero || '').trim();
   const alfanumerico = String(req.body.alfanumerico || '').trim();
 
-  if (!Number.isInteger(numero) || numero < 0) {
-    return res.status(400).json({ error: 'El número debe ser un entero positivo' });
+  if (!validarRut(numero)) {
+    return res.status(400).json({ error: 'El RUT ingresado no es válido' });
   }
 
   if (!alfanumerico || !/^[A-Za-z0-9]+$/.test(alfanumerico)) {
