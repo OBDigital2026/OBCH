@@ -100,8 +100,8 @@ app.post('/guardar', async (req, res) => {
     return res.status(400).json({ error: 'El RUT ingresado no es válido' });
   }
 
-  if (!alfanumerico || !/^[A-Za-z0-9]+$/.test(alfanumerico)) {
-    return res.status(400).json({ error: 'El campo alfanumérico solo admite letras y números' });
+  if (!alfanumerico || alfanumerico.length === 0) {
+    return res.status(400).json({ error: 'El campo alfanumérico no puede estar vacío' });
   }
 
   const sql = 'INSERT INTO ingresos (numero, alfanumerico) VALUES (?, ?)';
