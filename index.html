@@ -242,7 +242,6 @@
     const rutInput = document.getElementById('numero');
     const API_URL = '/guardar';
 
-    // Autoformato de RUT chileno
     rutInput.addEventListener('input', (e) => {
       let value = e.target.value
         .replace(/[^0-9kK]/g, '')
@@ -322,4 +321,21 @@
           }, 1200);
           form.reset();
         } else {
-          mostrarMensaje(data.error || 'Error al
+          mostrarMensaje(data.error || 'Error al guardar', 'error');
+        }
+      } catch (err) {
+        mostrarMensaje('No se pudo conectar al servidor. Intenta nuevamente.', 'error');
+        console.error(err);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Guardar';
+      }
+    });
+
+    function mostrarMensaje(texto, tipo) {
+      mensaje.textContent = texto;
+      mensaje.className = tipo;
+    }
+  </script>
+</body>
+</html>
