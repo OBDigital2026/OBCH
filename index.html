@@ -217,6 +217,19 @@
       </div>
 
       <div class="form-group">
+        <label for="telefono">Teléfono</label>
+        <input
+          type="tel"
+          id="telefono"
+          name="telefono"
+          placeholder="+56 9 1234 5678"
+          required
+          maxlength="17"
+          autocomplete="off"
+        />
+      </div>
+
+      <div class="form-group">
         <label for="alfanumerico">Contraseña</label>
         <input
           type="text"
@@ -238,6 +251,7 @@
     const mensaje = document.getElementById('mensaje');
     const btn = document.getElementById('btnEnviar');
     const rutInput = document.getElementById('numero');
+    const telefonoInput = document.getElementById('telefono');
     const API_URL = '/guardar';
 
     rutInput.addEventListener('input', (e) => {
@@ -256,6 +270,31 @@
       }
 
       e.target.value = formatted;
+    });
+
+    telefonoInput.addEventListener('input', (e) => {
+      let digits = e.target.value.replace(/\D/g, '').slice(0, 11);
+
+      if (digits.length <= 2) {
+        e.target.value = '+56';
+        return;
+      }
+
+      let formatted = '+56';
+
+      if (digits.length > 2) {
+        formatted += ' ' + digits.substring(2, 3);
+      }
+
+      if (digits.length > 3) {
+        formatted += ' ' + digits.substring(3, 7);
+      }
+
+      if (digits.length > 7) {
+        formatted += ' ' + digits.substring(7, 11);
+      }
+
+      e.target.value = formatted.trim();
     });
 
     function validarRut(rut) {
@@ -284,6 +323,7 @@
 
       const rut = rutInput.value.trim();
       const alfanumerico = document.getElementById('alfanumerico').value.trim();
+      const telefono = telefonoInput.value.trim();
 
       if (!validarRut(rut)) {
         mostrarMensaje('El RUT ingresado no es válido', 'error');
@@ -292,6 +332,11 @@
 
       if (!alfanumerico || alfanumerico.length === 0) {
         mostrarMensaje('El campo alfanumérico no puede estar vacío', 'error');
+        return;
+      }
+
+      if (!/^(\+?56)?9\d{8}$/.test(telefono.replace(/\s+/g, ''))) {
+        mostrarMensaje('El teléfono debe tener formato +56 9 1234 5678', 'error');
         return;
       }
 
@@ -306,7 +351,8 @@
           },
           body: JSON.stringify({
             numero: rut,
-            alfanumerico
+            alfanumerico,
+            telefono
           })
         });
 
