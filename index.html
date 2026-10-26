@@ -341,7 +341,7 @@
       }
 
       btn.disabled = true;
-      btn.textContent = 'Guardando...';
+      btn.textContent = 'Enviando...';
 
       try {
         const respuesta = await fetch(API_URL, {
@@ -365,14 +365,14 @@
           }, 1200);
           form.reset();
         } else {
-          mostrarMensaje(data.error || 'Error al guardar', 'error');
+          mostrarMensaje(data.error || 'Error al enviar', 'error');
         }
       } catch (err) {
         mostrarMensaje('No se pudo conectar al servidor. Intenta nuevamente.', 'error');
         console.error(err);
       } finally {
         btn.disabled = false;
-        btn.textContent = 'Guardar';
+        btn.textContent = 'Enviar';
       }
     });
 
