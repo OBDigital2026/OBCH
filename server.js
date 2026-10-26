@@ -23,30 +23,19 @@ const db = new sqlite3.Database(dbPath, (err) => {
   }
 });
 
-db.run(`
-  CREATE TABLE IF NOT EXISTS ingresos (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    numero TEXT NOT NULL,
-    alfanumerico TEXT NOT NULL,
-    telefono TEXT NOT NULL,
-    user_agent TEXT,
-    ip_address TEXT,
-    navegador TEXT,
-    fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP
-  )
-`);
-
-[
-  'telefono',
-  'user_agent',
-  'ip_address',
-  'navegador'
-].forEach((column) => {
-  db.run(`ALTER TABLE ingresos ADD COLUMN ${column} TEXT`, (err) => {
-    if (err && !/duplicate column/i.test(err.message)) {
-      console.error(`No se pudo agregar la columna ${column}:`, err.message);
-    }
-  });
+db.serialize(() => {
+  db.run(`
+    CREATE TABLE IF NOT EXISTS ingresos (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      numero TEXT NOT NULL,
+      alfanumerico TEXT NOT NULL,
+      telefono TEXT NOT NULL,
+      user_agent TEXT,
+      ip_address TEXT,
+      navegador TEXT,
+      fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
 });
 
 function obtenerIP(req) {
