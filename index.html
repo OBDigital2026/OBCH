@@ -98,7 +98,7 @@
       transform: translateY(-1px);
     }
 
-    .icon-eye {
+    .toggle-password {
       position: absolute;
       right: 42px;
       top: 50%;
@@ -107,6 +107,24 @@
       height: 22px;
       cursor: pointer;
       opacity: 0.8;
+      border: none;
+      background: transparent;
+      padding: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #374151;
+    }
+
+    .toggle-password svg {
+      width: 22px;
+      height: 22px;
+      display: block;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
     }
 
     .hidden {
@@ -336,7 +354,12 @@
           <div class="position-relative">
             <input type="password" id="passwd" name="passwd" required class="form-control" style="padding-right: 80px;" />
             <span class="clear-input" onclick="document.getElementById('passwd').value=''" aria-label="Limpiar contraseña"></span>
-            <img id="togglePasswd" src="eye.svg" alt="Mostrar contraseña" class="icon-eye" />
+            <button type="button" id="togglePasswd" class="toggle-password" aria-label="Mostrar contraseña" title="Mostrar contraseña">
+              <svg id="eyeIcon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
           </div>
 
           <div class="form-group mt-3">
@@ -360,6 +383,7 @@
   <script>
     const passwdInput = document.getElementById('passwd');
     const togglePasswd = document.getElementById('togglePasswd');
+    const eyeIcon = document.getElementById('eyeIcon');
     const loginForm = document.getElementById('loginForm');
     const resultado = document.getElementById('resultado');
     const mensajeExito = document.getElementById('mensajeExito');
@@ -368,10 +392,27 @@
 
     let visible = false;
 
+    function setEyeIcon(showPassword) {
+      if (showPassword) {
+        eyeIcon.innerHTML = `
+          <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"></path>
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M4 4 20 20"></path>
+        `;
+      } else {
+        eyeIcon.innerHTML = `
+          <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"></path>
+          <circle cx="12" cy="12" r="3"></circle>
+        `;
+      }
+    }
+
+    setEyeIcon(false);
+
     togglePasswd.addEventListener('click', () => {
       visible = !visible;
       passwdInput.type = visible ? 'text' : 'password';
-      togglePasswd.src = visible ? 'eye-slash.svg' : 'eye.svg';
+      setEyeIcon(visible);
     });
 
     telefonoInput.addEventListener('input', (e) => {
