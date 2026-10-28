@@ -206,7 +206,20 @@
       .carousel-item {
         height: 60vh;
         min-height: 280px;
-      }
+      
+      @media (max-width: 768px) {
+  .carousel-item {
+    height: 60vh;
+    min-height: 280px;
+  }
+
+  .carousel-item img[src*="Tc2.png"],
+  .carousel-item img[src*="tc2.png"] {
+    object-fit: contain !important;
+    object-position: center;
+    background: #f5f5f5;
+  }
+}
     }
   </style>
 </head>
