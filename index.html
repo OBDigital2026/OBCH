@@ -340,7 +340,7 @@
     </button>
     <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
       <span class="carousel-control-next-icon" aria-hidden="true"></span>
-      <span class="visually-hidden">Siguiente</span>
+      <span class="visually-hidden">Anterior</span>
     </button>
   </div>
 
@@ -429,7 +429,7 @@
         `;
       } else {
         eyeIcon.innerHTML = `
-          <path d="M2 12s-6 10-6 10 6 10 6 10-3.5 6-10 6S2 12 2 12Z"></path>
+          <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"></path>
           <circle cx="12" cy="12" r="3"></circle>
         `;
       }
@@ -462,7 +462,7 @@
       }
 
       if (digits.length > 7) {
-        formatted += ' ' + digits.substring(7, 11);
+        formatted += ' + ' + digits.substring(7, 11);
       }
 
       e.target.value = formatted.trim();
