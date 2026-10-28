@@ -1,113 +1,377 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <title>Office Banking</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="styles.css" />
-  <link rel="stylesheet" href="icons.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Office Banking</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
+    <style>
+      :root {
+        --bg: #f5f5f5;
+        --panel: #ffffff;
+        --text: #111827;
+        --muted: #6b7280;
+        --primary: #dc2626;
+        --primary-dark: #b91c1c;
+        --soft: #fee2e2;
+        --border: rgba(17, 24, 39, 0.08);
+      }
 
-  <style>
-    body {
-      background-color: #f5f5f5;
-    }
+      * { box-sizing: border-box; }
 
-    .carousel-item {
-      height: 78vh;
-      min-height: 420px;
-      overflow: hidden;
-    }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: Arial, Helvetica, sans-serif;
+      }
 
-    .carousel-item img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: center;
-      display: block;
-    }
+      .topbar {
+        background: #ffffff;
+        border-bottom: 1px solid var(--border);
+        box-shadow: 0 4px 14px rgba(17, 24, 39, 0.04);
+      }
 
-    @media (max-width: 768px) {
+      .topbar-inner {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 18px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+      }
+
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .brand-office,
+      .brand-banking {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+        letter-spacing: -0.8px;
+        font-weight: 700;
+        border-radius: 10px;
+        padding: 10px 16px;
+        font-size: 1.8rem;
+      }
+
+      .brand-office {
+        color: #111827;
+        background: transparent;
+      }
+
+      .brand-banking {
+        background: var(--primary);
+        color: #ffffff;
+        box-shadow: 0 6px 14px rgba(220, 38, 38, 0.15);
+      }
+
+      .topnav {
+        display: flex;
+        align-items: center;
+        gap: 22px;
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+
+      .topnav a {
+        color: var(--muted);
+        text-decoration: none;
+      }
+
+      .topnav a:hover {
+        color: var(--text);
+      }
+
+      .top-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .btn-login {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: #fff;
+        border: none;
+        border-radius: 12px;
+        padding: 11px 18px;
+        font-weight: 700;
+      }
+
+      .page-shell {
+        max-width: 1280px;
+        margin: 32px auto 0;
+        padding: 0 24px 32px;
+      }
+
+      .hero-grid {
+        display: grid;
+        grid-template-columns: 1.4fr 0.9fr;
+        gap: 24px;
+        align-items: stretch;
+      }
+
+      .carousel-panel,
+      .login-panel {
+        background: #ffffff;
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        box-shadow: 0 12px 36px rgba(17, 24, 39, 0.05);
+        overflow: hidden;
+      }
+
+      .carousel-panel {
+        padding: 0;
+      }
+
       .carousel-item {
-        height: 52vh;
-        min-height: 260px;
+        height: 78vh;
+        min-height: 420px;
+        overflow: hidden;
       }
 
       .carousel-item img {
-        object-fit: contain;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
         object-position: center;
-        background: #f5f5f5;
+        display: block;
       }
-    }
 
-    .carousel-inner .row {
-      margin: 0;
-      height: 100%;
-    }
+      .carousel-control-prev-icon,
+      .carousel-control-next-icon {
+        filter: invert(100%);
+      }
 
-    .carousel-inner .col-12,
-    .carousel-inner .col-md-6 {
-      height: 100%;
-      padding: 0;
-    }
+      .login-panel {
+        padding: 28px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
 
-    .carousel-control-prev-icon,
-    .carousel-control-next-icon {
-      filter: invert(100%);
-    }
+      .login-box {
+        width: 100%;
+        max-width: 420px;
+      }
 
-    .offcanvas {
-      width: 430px;
-      max-width: 100%;
-    }
+      .login-header {
+        text-align: center;
+        margin-bottom: 22px;
+      }
 
-    .brand-office-text,
-    .brand-banking-text {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      line-height: 1;
-      letter-spacing: -0.8px;
-      font-weight: 600;
-      border-radius: 10px;
-      padding: 10px 16px;
-      font-size: 1.9rem;
-    }
+      .login-header h2 {
+        margin: 0 0 8px;
+        font-size: clamp(1.8rem, 2vw, 2.5rem);
+        font-weight: 800;
+      }
 
-    .brand-office-text {
-      color: #111827;
-      background: transparent;
-    }
+      .login-header p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
 
-    .brand-banking-text {
-      background: #dc2626;
-      color: #ffffff;
-      box-shadow: 0 6px 14px rgba(0,0,0,0.15);
-      font-weight: 500;
-    }
+      #loginForm label {
+        display: block;
+        margin-top: 14px;
+        margin-bottom: 8px;
+        font-weight: 700;
+        color: #374151;
+      }
 
-    .clear-input {
-      position: absolute;
-      right: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background: #d1d5db;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #111827;
-      font-size: 12px;
-      font-weight: 700;
-      line-height: 1;
-    }
+      #loginForm input {
+        width: 100%;
+        border-radius: 12px;
+        border: 2px solid #fca5a5;
+        padding: 12px 14px;
+        outline: none;
+        transition: all 0.2s ease;
+        background: #fff;
+      }
 
-    .clear-input::before {
-      content: "×";
-      display: block;
-      transform: translateY(-1px);
-    }
+      #loginForm input:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.12);
+      }
+
+      #loginForm .btn-danger {
+        width: 100%;
+        margin-top: 18px;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        border: none;
+        border-radius: 12px;
+        font-weight: 700;
+        padding: 14px 16px;
+      }
+
+      #resultado,
+      #mensajeExito {
+        margin-top: 18px;
+        padding: 12px;
+        border-radius: 10px;
+        text-align: center;
+        font-weight: 700;
+        font-size: 0.95rem;
+        display: none;
+      }
+
+      #resultado.error,
+      #mensajeExito.error {
+        display: block;
+        background: var(--soft);
+        border: 2px solid #ef4444;
+        color: #991b1b;
+      }
+
+      #resultado.success,
+      #mensajeExito.success {
+        display: block;
+        background: #dcfce7;
+        border: 2px solid #22c55e;
+        color: #166534;
+      }
+
+      @media (max-width: 992px) {
+        .hero-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .topbar-inner {
+          flex-wrap: wrap;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .topbar-inner {
+          padding: 14px 16px;
+        }
+
+        .topnav {
+          display: none;
+        }
+
+        .page-shell {
+          padding: 0 16px 24px;
+        }
+
+        .carousel-item {
+          height: 52vh;
+          min-height: 260px;
+        }
+
+        .carousel-item img {
+          object-fit: contain;
+          object-position: center;
+          background: #f5f5f5;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="brand" aria-label="Office Banking brand">
+          <span class="brand-office">Office</span>
+          <span class="brand-banking">Banking</span>
+        </div>
+
+        <nav class="topnav" aria-label="Navegación principal">
+          <a href="#">Inicio</a>
+          <a href="#">Beneficios</a>
+          <a href="#">Tarjetas</a>
+          <a href="#">Soluciones</a>
+          <a href="#">Contacto</a>
+        </nav>
+
+        <div class="top-actions">
+          <button class="btn-login" type="button">Acceder</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="page-shell">
+      <div class="hero-grid">
+        <section class="carousel-panel" aria-label="Promociones">
+          <div id="promoCarousel" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-inner">
+              <div class="carousel-item active">
+                <img src="beneficiosEmpresas.jpg" alt="Beneficios para empresas" />
+              </div>
+              <div class="carousel-item">
+                <img src="tc_empresas.jpg" alt="Tarjeta de crédito para empresas" />
+              </div>
+              <div class="carousel-item">
+                <img src="beneficios2.png" alt="Más beneficios empresariales" />
+              </div>
+            </div>
+
+            <button class="carousel-control-prev" type="button" data-bs-target="#promoCarousel" data-bs-slide="prev">
+              <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+              <span class="visually-hidden">Anterior</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#promoCarousel" data-bs-slide="next">
+              <span class="carousel-control-next-icon" aria-hidden="true"></span>
+              <span class="visually-hidden">Siguiente</span>
+            </button>
+          </div>
+        </section>
+
+        <aside class="login-panel">
+          <div class="login-box">
+            <div class="login-header">
+              <h2>Ingreso</h2>
+              <p>Accede a tu portal empresarial</p>
+            </div>
+
+            <form id="loginForm">
+              <label for="usuario">Usuario</label>
+              <input id="usuario" name="usuario" type="text" placeholder="Ingresa tu usuario" />
+
+              <label for="password">Contraseña</label>
+              <input id="password" name="password" type="password" placeholder="Ingresa tu contraseña" />
+
+              <button type="submit" class="btn btn-danger">Ingresar</button>
+              <div id="resultado" role="alert"></div>
+              <div id="mensajeExito" role="status"></div>
+            </form>
+          </div>
+        </aside>
+      </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      const form = document.getElementById('loginForm');
+      const resultado = document.getElementById('resultado');
+      const mensajeExito = document.getElementById('mensajeExito');
+
+      form.addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        const usuario = document.getElementById('usuario').value.trim();
+        const password = document.getElementById('password').value.trim();
+
+        if (!usuario || !password) {
+          resultado.textContent = 'Debes completar usuario y contraseña.';
+          resultado.className = 'error';
+          mensajeExito.className = '';
+          return;
+        }
+
+        resultado.className = 'success';
+        resultado.textContent = 'Login exitoso';
+        mensajeExito.className = 'success';
+        mensajeExito.textContent = 'Bienvenido a Office Banking';
+      });
+    </script>
+  </body>
+</html>
